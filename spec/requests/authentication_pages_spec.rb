@@ -8,6 +8,15 @@ describe "Authentication" do
     		describe "for non-signed-in users" do
       			let(:user) { FactoryGirl.create(:user) }
 
+			let(:non_admin) { FactoryGirl.create(:user) }
+
+
+      			describe "submitting a DELETE request to the Users#destroy action" do
+ 				before { sign_in non_admin, no_capybara: true }
+	       			before { delete user_path(user) }
+        			specify { expect(response).to redirect_to(root_url) }
+      			end
+
       			describe "in the Users controller" do
 		
 				describe "when request to show all users" do
