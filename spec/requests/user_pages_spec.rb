@@ -36,6 +36,11 @@ describe "User pages" do
             click_link('delete', match: :first)
           end.to change(User, :count).by(-1)
         end
+	it "should not be able to delete himself" do
+          expect do
+            delete user_path(admin)
+          end.not_to change(User, :count)
+        end
         it { should_not have_link('delete', href: user_path(admin)) }
       end
     end
@@ -63,6 +68,19 @@ describe "User pages" do
       specify { expect(user.reload.name).to  eq new_name }
       specify { expect(user.reload.email).to eq new_email }
     end
+
+   describe "forbidden attributes" do
+      let(:params) do
+        { user: { admin: true, password: user.password,
+                  password_confirmation: user.password } }
+      end
+      before do
+        sign_in user, no_capybara: true
+        patch user_path(user), params
+      end
+      specify { expect(user.reload).not_to be_admin }
+    end
+
   end
 
   describe "profile page" do
@@ -100,7 +118,7 @@ describe "User pages" do
         fill_in "Name",         with: "Example User"
         fill_in "Email",        with: "user@example.com"
         fill_in "Password",     with: "foobar"
-        fill_in "Confirmation", with: "foobar"
+        fill_in "Confirm Password", with: "foobar"
       end
 
       it "should create a user" do
